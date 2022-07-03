@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block con %}
+    <h1><b>{{ b.subject }}</b></h1>
+    <div class="row mt-4">
+        <div class="col-sm-9">      
+            <textarea class="form-control" disabled style="height: 180px;">{{ b.content }}</textarea>
+        </div>
+
+        <div class="col-sm-3 text-center">           
+            <img src="{{ b.writer.getpic }}" width="90%">
+            <div class="mt-3">
+                <h4><b>written by {{ b.writer }}</b></h4>
+            </div>
+            <div class="text-end">
+                {{ b.pubdate }}
+            </div>
+        </div>
+    </div>
+
+    <div class="text-end mt-4">
+        <a class="btn btn-dark" href="{% url 'board:index' %}">글목록</a>
+        
+        {% if user == b.writer %}
+            <a class="btn btn-secondary" href="{% url 'board:update'  b.id %}">글수정</a>
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                글 삭제
+            </button>
+        {% endif %}
+    </div>
+
+    <div class="text-end mt-3">
+        {% if user in b.likey.all %}
+            <a href="{% url 'board:unlikey' b.id %}" class="btn btn-danger btn-sm">👎</a>
+        {% else %}
+            <a href="{% url 'board:likey' b.id %}" class="btn btn-primary btn-sm">👍</a>
+        {% endif %}
+    </div>
+
+    <hr>
+    
+    <form method="post" action="{% url 'board:creply' b.id %}">
+        {% csrf_token %}
+        <div class="row mt-5">
+            <div class="col-sm-10">
+                <input type="text" name="rep" class="form-control" placeholder="댓글을 입력하세요">
+            </div>
+            <div class="col-sm-2">
+                <button class="btn btn-dark" style="width: 100%;">댓글작성</button>
+            </div>
+        </div>
+    </form>
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel"><b>게시글 삭체 알림창</b></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    정말 삭제하시겠습니까?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+                    <a href="{% url 'board:delete' b.id %}" class="btn btn-danger">삭제</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <hr>
+
+    {% if rset %}
+        {% for i in rset %}
+            <div class="row mt-5" style="width: 80%;">
+                <div class="col-sm-3 text-center">
+                    <img src="{{ i.replyer.getpic }}" width="100%">
+                    <div class="text-center mt-3">
+                        <h5><b>{{ i.replyer }}</b></h6>
+                    </div>
+                </div>
+                <div class="col-sm-9">
+                    <textarea disabled class="form-control" style="height: 130px;">{{ i.comment }}</textarea>
+                    <div class="text-end mt-3">
+                        {% if user == i.replyer %}
+                        <a href="{% url 'board:dreply' b.id i.id %}" class="btn btn-danger">댓글삭제</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <h5 class="text-center">첫번째 댓글을 달아주세요😊</h5>
+    {% endif %}
+
+
+
+
+{% endblock %}
